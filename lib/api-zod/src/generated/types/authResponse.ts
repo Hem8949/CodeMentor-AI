@@ -5,7 +5,9 @@
  * API for CodeMentor AI
  * OpenAPI spec version: 0.1.0
  */
+import type { Profile } from './profile';
 
-export interface HealthStatus {
-  status: string;
+export interface AuthResponse {
+  token: string;
+  user: Profile;
 }

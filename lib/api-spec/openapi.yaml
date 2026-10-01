@@ -3,13 +3,27 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API for CodeMentor AI
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Account registration and sign-in
+  - name: profile
+    description: Learner profile
+  - name: problems
+    description: Practice problem catalog
+  - name: attempts
+    description: Saved coding attempts
+  - name: mentor
+    description: Personalized mentor and Code Doctor
+  - name: dashboard
+    description: Learning progress and activity
+security:
+  - bearerAuth: []
 paths:
   /healthz:
     get:
@@ -17,6 +31,7 @@ paths:
       tags: [health]
       summary: Health check
       description: Returns server health status
+      security: []
       responses:
         "200":
           description: Healthy
@@ -24,7 +39,279 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /health:
+    get:
+      operationId: getApiHealth
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      security: []
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /auth/register:
+    post:
+      operationId: registerUser
+      tags: [auth]
+      summary: Create a learner account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/ApiError"
+        "409":
+          $ref: "#/components/responses/ApiError"
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags: [auth]
+      summary: Sign in to an account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/ApiError"
+        "401":
+          $ref: "#/components/responses/ApiError"
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get the signed-in learner profile
+      responses:
+        "200":
+          description: Learner profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "401":
+          $ref: "#/components/responses/ApiError"
+    put:
+      operationId: updateProfile
+      tags: [profile]
+      summary: Update the signed-in learner profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "400":
+          $ref: "#/components/responses/ApiError"
+  /problems:
+    get:
+      operationId: getProblems
+      tags: [problems]
+      summary: List practice problems
+      parameters:
+        - name: difficulty
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [easy, medium, hard]
+        - name: language
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [JavaScript, Python, Java]
+      responses:
+        "200":
+          description: Problems
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Problem"
+  /problems/{problemId}:
+    get:
+      operationId: getProblem
+      tags: [problems]
+      summary: Get a practice problem
+      parameters:
+        - $ref: "#/components/parameters/ProblemId"
+      responses:
+        "200":
+          description: Problem
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          $ref: "#/components/responses/ApiError"
+  /attempts:
+    get:
+      operationId: getAttempts
+      tags: [attempts]
+      summary: List the signed-in learner's attempts
+      responses:
+        "200":
+          description: Attempts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Attempt"
+    post:
+      operationId: createAttempt
+      tags: [attempts]
+      summary: Save a coding attempt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttemptInput"
+      responses:
+        "201":
+          description: Saved attempt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attempt"
+        "400":
+          $ref: "#/components/responses/ApiError"
+  /attempts/{attemptId}:
+    put:
+      operationId: updateAttempt
+      tags: [attempts]
+      summary: Update a saved attempt
+      parameters:
+        - $ref: "#/components/parameters/AttemptId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttemptUpdate"
+      responses:
+        "200":
+          description: Updated attempt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attempt"
+        "404":
+          $ref: "#/components/responses/ApiError"
+  /mentor:
+    post:
+      operationId: askMentor
+      tags: [mentor]
+      summary: Ask CodeMentor for personalized coaching
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MentorInput"
+      responses:
+        "200":
+          description: Mentor response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MentorResponse"
+        "400":
+          $ref: "#/components/responses/ApiError"
+        "502":
+          $ref: "#/components/responses/ApiError"
+  /doctor:
+    post:
+      operationId: askDoctor
+      tags: [mentor]
+      summary: Get debugging or code-improvement coaching
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DoctorInput"
+      responses:
+        "200":
+          description: Code Doctor response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MentorResponse"
+        "400":
+          $ref: "#/components/responses/ApiError"
+        "502":
+          $ref: "#/components/responses/ApiError"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get learning progress and recent activity
+      responses:
+        "200":
+          description: Learner dashboard
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    ProblemId:
+      name: problemId
+      in: path
+      required: true
+      schema:
+        type: string
+    AttemptId:
+      name: attemptId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    ApiError:
+      description: Request failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +320,140 @@ components:
           type: string
       required:
         - status
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    Profile:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        display_name: { type: string }
+        skill_level: { type: string, enum: [Beginner, Intermediate, Advanced] }
+        preferred_language: { type: string, enum: [JavaScript, Python, Java] }
+        created_at: { type: string, format: date-time }
+      required: [id, email, display_name, skill_level, preferred_language, created_at]
+    RegisterInput:
+      type: object
+      properties:
+        display_name: { type: string, minLength: 1, maxLength: 80 }
+        email: { type: string, format: email, maxLength: 254 }
+        password: { type: string, minLength: 8, maxLength: 128 }
+        skill_level: { type: string, enum: [Beginner, Intermediate, Advanced] }
+        preferred_language: { type: string, enum: [JavaScript, Python, Java] }
+      required: [display_name, email, password, skill_level, preferred_language]
+    LoginInput:
+      type: object
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        password: { type: string, minLength: 1, maxLength: 128 }
+      required: [email, password]
+    AuthResponse:
+      type: object
+      properties:
+        token: { type: string }
+        user:
+          $ref: "#/components/schemas/Profile"
+      required: [token, user]
+    ProfileUpdate:
+      type: object
+      properties:
+        display_name: { type: string, minLength: 1, maxLength: 80 }
+        skill_level: { type: string, enum: [Beginner, Intermediate, Advanced] }
+        preferred_language: { type: string, enum: [JavaScript, Python, Java] }
+    Problem:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        language: { type: string, enum: [JavaScript, Python, Java] }
+        difficulty: { type: string, enum: [easy, medium, hard] }
+        starter_code: { type: string }
+      required: [id, title, description, language, difficulty, starter_code]
+    Attempt:
+      type: object
+      properties:
+        id: { type: string }
+        user_id: { type: string }
+        problem_id: { type: ["string", "null"] }
+        problem_title: { type: ["string", "null"] }
+        language: { type: string }
+        code: { type: string }
+        output: { type: ["string", "null"] }
+        status: { type: string, enum: [in_progress, solved, stuck] }
+        hints_used: { type: integer, minimum: 0 }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+      required: [id, user_id, problem_id, problem_title, language, code, output, status, hints_used, created_at, updated_at]
+    AttemptInput:
+      type: object
+      properties:
+        problem_id: { type: ["string", "null"] }
+        language: { type: string, enum: [JavaScript, Python, Java] }
+        code: { type: string, maxLength: 50000 }
+        output: { type: ["string", "null"], maxLength: 10000 }
+        status: { type: string, enum: [in_progress, solved, stuck] }
+        hints_used: { type: integer, minimum: 0, maximum: 100 }
+      required: [language, code, status]
+    AttemptUpdate:
+      type: object
+      properties:
+        code: { type: string, maxLength: 50000 }
+        output: { type: ["string", "null"], maxLength: 10000 }
+        status: { type: string, enum: [in_progress, solved, stuck] }
+        hints_used: { type: integer, minimum: 0, maximum: 100 }
+    MentorInput:
+      type: object
+      properties:
+        mode: { type: string, enum: [hint, explain, debug, review, similar, solution, ask] }
+        problem_id: { type: string }
+        attempt_id: { type: string }
+        code: { type: string, maxLength: 50000 }
+        language: { type: string, enum: [JavaScript, Python, Java] }
+        user_text: { type: string, maxLength: 4000 }
+      required: [mode]
+    DoctorInput:
+      type: object
+      properties:
+        mode: { type: string, enum: [debug, improve] }
+        code: { type: string, minLength: 1, maxLength: 50000 }
+        language: { type: string, enum: [JavaScript, Python, Java] }
+        error: { type: string, maxLength: 4000 }
+      required: [mode, code]
+    MentorResponse:
+      type: object
+      properties:
+        reply: { type: string }
+        weak_concepts:
+          type: array
+          items: { type: string }
+        hints_used: { type: integer, minimum: 0 }
+      required: [reply, weak_concepts, hints_used]
+    Weakness:
+      type: object
+      properties:
+        concept: { type: string }
+        count: { type: integer }
+      required: [concept, count]
+    Dashboard:
+      type: object
+      properties:
+        attempted: { type: integer }
+        solved: { type: integer }
+        solve_rate: { type: number }
+        avg_hints: { type: number }
+        completion_pct: { type: number }
+        top_weaknesses:
+          type: array
+          items:
+            $ref: "#/components/schemas/Weakness"
+        recent_attempts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Attempt"
+      required: [attempted, solved, solve_rate, avg_hints, completion_pct, top_weaknesses, recent_attempts]
 

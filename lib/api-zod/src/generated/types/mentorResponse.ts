@@ -6,6 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
-  status: string;
+export interface MentorResponse {
+  reply: string;
+  weak_concepts: string[];
+  /** @minimum 0 */
+  hints_used: number;
 }
