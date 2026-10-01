@@ -1,0 +1,46 @@
+CodeMentor AI — Replit Agent Mega-Prompt (paste into Replit Agent)
+Build a complete full-stack web application called CodeMentor AI — Personal Coding Mentor (hackathon theme: Personalized AI Experiences).
+The problem
+Beginners learning to code get generic help (Stack Overflow, raw AI chats) that assumes too much knowledge. They drown in jargon, copy code they don't understand, and repeat the same mistakes.
+The solution
+A personal AI coding mentor that adapts to each learner's skill level, language, and mistakes — it coaches instead of handing over answers.
+Tech stack (strict)
+Frontend: React 18 + Vite + React Router v6 + Tailwind CSS + Axios + Recharts
+Backend: Node.js + Express.js + JWT authentication + bcrypt password hashing + Zod validation
+Database: PostgreSQL (use Replit's built-in PostgreSQL database)
+AI: Google Gemini API via REST (model gemini-3.8-flash; if unavailable use the current Gemini flash model). The GEMINI_API_KEY lives ONLY in backend environment variables (Replit Secrets) — never expose it to the frontend.
+Secrets needed: GEMINI_API_KEY, JWT_SECRET, DATABASE_URL (ask me to add them in Replit Secrets if missing)
+Design (very important — inspired by a modern learning dashboard)
+Light, friendly, learning-app aesthetic:
+Left sidebar navigation with icons + labels: Dashboard, Practice, Code Doctor, History, Logout at the bottom. Active item highlighted in indigo.
+Dashboard top: big greeting "Hello, {display name}" + subtitle showing skill level (e.g. "Beginner Explorer"), plus a progress bar showing "X% completed" (share of attempted problems solved).
+Large rounded-2xl cards with soft shadows, generous spacing, clean sans-serif font.
+"Keep on coding" section: problem cards to continue practicing.
+"Your Weak Spots" card: bar chart of the user's most frequent mistake concepts (the personalization showcase).
+Stat cards row: Problems Attempted, Solved, Solve Rate, Avg Hints Used.
+Accent color indigo/violet. Difficulty badges: green (easy), amber (medium), red (hard).
+Fully responsive (works on mobile).
+Pages & routes
+/ Landing — hero "Your Personal Coding Mentor", 3 feature cards (🎯 Adapts to your level / 🐛 Debug Doctor / 🧠 Socratic coaching that never just gives answers), 3-step how-it-works, CTA buttons.
+/register — name, email, password, skill level select (Beginner/Intermediate/Advanced), preferred language select (JavaScript/Python/Java).
+/login — email + password, show/hide password toggle.
+/dashboard (protected) — greeting + "% completed" progress bar, 4 stat cards, "Keep on coding" problem cards, "Your Weak Spots" bar chart, recent activity list.
+/practice (protected) — the core page, 3 columns: left = problem list with All/Easy/Medium/Hard filters; center = problem description + dark monospace code editor + ▶ Run button + output console + 💾 Save + ✅ Mark Solved; right = AI Mentor panel with 6 buttons: 💡 Give Hint, 🧠 Explain Concept, 🐛 Help Debug, 🔍 Review My Approach, 🔥 Similar Problem, ✅ Show Solution, plus an "Ask the mentor..." text input. The Run button executes JavaScript in the browser: capture console.log output and errors and show them in the console panel.
+/doctor (protected) — "Code Doctor": big code textarea + language select + optional error-message input; buttons 🐛 Debug My Code and ✨ Improve My Code; AI response panel below.
+/history (protected) — list of past attempts with status badges, click to expand and view the saved code.
+The AI mentor brain (critical — implement exactly)
+Every mentor/doctor request flows: Frontend → Express backend → Gemini. The backend builds a system prompt containing the student's profile:
+"You are CodeMentor, a personal coding mentor. Student: {skill_level} learning {language}. Recurring weak concepts: {their top mistakes}. Hints used on this problem: {n}. STRICT RULES: Do NOT praise every tiny thing — be warm but honest and direct. If the student's thinking is wrong, say clearly 'That approach won't work because...' then guide them to discover why themselves. Keep responses SHORT during problem solving — one small hint at a time, never the full path at once. Prefer this format: 🎯 What do you know? [a question checking understanding] / 💡 Hint [one small hint] / 🧠 Your turn [what they should try next]. Only increase help if they remain stuck. NEVER reveal the full solution unless explicitly asked via Show Solution. Your goal: make them able to say 'Give me a problem. I can figure out how to start.' When they solve something, offer a slightly harder variation. Adapt vocabulary and depth to a {skill_level}."
+Per-button behavior: hint → exactly one small hint; explain → the concept with a simple real-life analogy; debug → do NOT rewrite their code, guide them to find the bug themselves; review → judge the approach and time complexity, suggest direction without giving code; similar → invent a brand-new similar practice problem (title + description + starter code); solution → full solution explaining WHY each part works; improve (doctor) → before/after code with why each change is better.
+After every mentor reply, extract the weak concepts (e.g. "loops", "recursion") and store/increment them per user in a weaknesses table — this powers the "Your Weak Spots" chart and future personalization.
+Database tables
+users(id, email unique, password_hash, display_name, skill_level, preferred_language, created_at); problems(id, title, description, language, difficulty, starter_code); attempts(id, user_id, problem_id nullable, language, code, output, status [in_progress|solved|stuck], hints_used, created_at, updated_at); weaknesses(id, user_id, concept, count, updated_at, unique(user_id, concept)).
+Seed 6 JavaScript problems: Reverse a String (easy), FizzBuzz (easy), Find Largest Number (easy), Palindrome Checker (medium), Two Sum (medium), Flatten Nested Array (hard) — each with a 1–2 sentence description including an example, plus starter code.
+API (Express, all under /api; JWT required except /api/health and auth routes)
+POST /api/auth/register and POST /api/auth/login → {token, user}; GET /api/profile and PUT /api/profile; GET /api/problems?difficulty= and GET /api/problems/:id; POST /api/attempts, PUT /api/attempts/:id, GET /api/attempts; POST /api/mentor {mode, problem_id?, attempt_id?, code?, language?, user_text?} → {reply, weak_concepts}; POST /api/doctor {mode: debug|improve, code, language?, error?} → {reply, weak_concepts}; GET /api/dashboard → {attempted, solved, solve_rate, avg_hints, top_weaknesses, recent_attempts, completion_pct}.
+Quality bar
+Every button shows a loading state; API errors appear as friendly messages; friendly empty states everywhere ("No attempts yet — solve your first problem!").
+✅ Show Solution must ask for confirmation first ("The mentor believes in you — sure?").
+Validate all inputs with Zod; never leak the Gemini key to the frontend.
+After building, verify end-to-end: register → login → dashboard loads with greeting and progress → practice: select a problem, run code, get a hint → mark solved → dashboard % updates.
+When done: push the code to GitHub (public repo) and Publish the deployment so I get a public link.

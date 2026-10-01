@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "CodeMentor AI"
+description = "A personal coding mentor for beginner and intermediate learners, with adaptive practice, Socratic hints, debugging guidance, skill analytics, and saved attempts."
+version = "1.0.0"
+id = "artifacts/codementor-ai"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21280
+
+[services.development]
+run = "pnpm --filter @workspace/codementor-ai run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/codementor-ai", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/codementor-ai/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21280"
+BASE_PATH = "/"
