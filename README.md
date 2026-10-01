@@ -547,7 +547,7 @@ Important workflows to test:
 
 ### GitHub
 
-https://github.com/ashish-jagdale-ai/CodeMentor-AI
+https://github.com/Hem8949/CodeMentor-AI
 
 ### Live Demo
 
