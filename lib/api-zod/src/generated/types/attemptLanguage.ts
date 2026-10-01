@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type RegisterInputPreferredLanguage = typeof RegisterInputPreferredLanguage[keyof typeof RegisterInputPreferredLanguage];
+export type AttemptLanguage = typeof AttemptLanguage[keyof typeof AttemptLanguage];
 
 
-export const RegisterInputPreferredLanguage = {
+export const AttemptLanguage = {
   JavaScript: 'JavaScript',
   Python: 'Python',
   Java: 'Java',

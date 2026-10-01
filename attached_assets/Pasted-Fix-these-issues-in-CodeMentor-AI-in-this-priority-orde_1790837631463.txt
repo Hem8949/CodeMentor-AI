@@ -1,0 +1,13 @@
+Fix these issues in CodeMentor AI, in this priority order. Do not add new features.
+
+1. MENTOR 502 ERRORS (most critical — the AI demo depends on this): "Ask mentor", "Give Hint", "Explain Concept", "Help Debug", "Debug My Code", "Improve My Code" all show "HTTP 502 Bad Gateway". Diagnose the backend: (a) confirm GEMINI_API_KEY is loaded from Replit Secrets — ask me to add it if missing; (b) confirm the Gemini model name is currently available — use gemini-3.8-flash via REST v1beta generateContent; (c) log the real Gemini API error server-side; (d) never crash the request — always return JSON {error:"..."} on failure. Then make ONE real mentor request yourself and show me the reply working.
+
+2. DATA NOT BEING STORED: saved code, attempts, history don't persist. Wire JWT centrally: EVERY /api/* frontend request must send Authorization: Bearer <token> from localStorage through ONE shared API helper. Verify: save code → refresh → code still there; mark solved → appears in History.
+
+3. MORE LANGUAGES: support JavaScript, Python, Java, C++, C, TypeScript everywhere languages appear (register dropdown, practice filter, code doctor dropdown).
+
+4. PROBLEMS FOR EVERY LANGUAGE: seed at least 4 problems each for Python, Java, C++ (keep the JavaScript set). Each: title, 1-2 sentence description with example, difficulty, starter code. The Run button executes JavaScript in the browser — for other languages disable Run with a friendly note "Run is available for JavaScript in this demo".
+
+5. MORE ATTRACTIVE + ROBUST: (a) add an "X% completed" progress bar under the "Hello, {name}" dashboard greeting; (b) card hover lift effects, consistent rounded corners; (c) on mentor failure show ONE friendly error card with a Retry button — never raw "HTTP 502" text; (d) loading shimmer/dots while the mentor thinks.
+
+Final verification: register → login → dashboard → practice a JavaScript problem (run code, get a hint) → code doctor debug → history shows the attempt. Report each check pass/fail.

@@ -29,6 +29,9 @@ export const ProfilePreferredLanguage = {
   JavaScript: 'JavaScript',
   Python: 'Python',
   Java: 'Java',
+  'C++': 'C++',
+  C: 'C',
+  TypeScript: 'TypeScript',
 } as const;
 
 export interface Profile {
@@ -56,6 +59,9 @@ export const RegisterInputPreferredLanguage = {
   JavaScript: 'JavaScript',
   Python: 'Python',
   Java: 'Java',
+  'C++': 'C++',
+  C: 'C',
+  TypeScript: 'TypeScript',
 } as const;
 
 export interface RegisterInput {
@@ -106,6 +112,9 @@ export const ProfileUpdatePreferredLanguage = {
   JavaScript: 'JavaScript',
   Python: 'Python',
   Java: 'Java',
+  'C++': 'C++',
+  C: 'C',
+  TypeScript: 'TypeScript',
 } as const;
 
 export interface ProfileUpdate {
@@ -125,6 +134,9 @@ export const ProblemLanguage = {
   JavaScript: 'JavaScript',
   Python: 'Python',
   Java: 'Java',
+  'C++': 'C++',
+  C: 'C',
+  TypeScript: 'TypeScript',
 } as const;
 
 export type ProblemDifficulty = typeof ProblemDifficulty[keyof typeof ProblemDifficulty];
@@ -145,6 +157,18 @@ export interface Problem {
   starter_code: string;
 }
 
+export type AttemptLanguage = typeof AttemptLanguage[keyof typeof AttemptLanguage];
+
+
+export const AttemptLanguage = {
+  JavaScript: 'JavaScript',
+  Python: 'Python',
+  Java: 'Java',
+  'C++': 'C++',
+  C: 'C',
+  TypeScript: 'TypeScript',
+} as const;
+
 export type AttemptStatus = typeof AttemptStatus[keyof typeof AttemptStatus];
 
 
@@ -161,7 +185,7 @@ export interface Attempt {
   problem_id: string | null;
   /** @nullable */
   problem_title: string | null;
-  language: string;
+  language: AttemptLanguage;
   code: string;
   /** @nullable */
   output: string | null;
@@ -179,6 +203,9 @@ export const AttemptInputLanguage = {
   JavaScript: 'JavaScript',
   Python: 'Python',
   Java: 'Java',
+  'C++': 'C++',
+  C: 'C',
+  TypeScript: 'TypeScript',
 } as const;
 
 export type AttemptInputStatus = typeof AttemptInputStatus[keyof typeof AttemptInputStatus];
@@ -254,6 +281,9 @@ export const MentorInputLanguage = {
   JavaScript: 'JavaScript',
   Python: 'Python',
   Java: 'Java',
+  'C++': 'C++',
+  C: 'C',
+  TypeScript: 'TypeScript',
 } as const;
 
 export interface MentorInput {
@@ -282,6 +312,9 @@ export const DoctorInputLanguage = {
   JavaScript: 'JavaScript',
   Python: 'Python',
   Java: 'Java',
+  'C++': 'C++',
+  C: 'C',
+  TypeScript: 'TypeScript',
 } as const;
 
 export interface DoctorInput {
@@ -344,5 +377,8 @@ export const GetProblemsLanguage = {
   JavaScript: 'JavaScript',
   Python: 'Python',
   Java: 'Java',
+  'C++': 'C++',
+  C: 'C',
+  TypeScript: 'TypeScript',
 } as const;
 

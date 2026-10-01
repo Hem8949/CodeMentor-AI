@@ -14,8 +14,14 @@ type GeminiReply = {
   weak_concepts: string[];
 };
 
+const GEMINI_MODEL = "gemini-3.8-flash";
+
 class GeminiError extends Error {
-  constructor(message: string, readonly statusCode = 502) {
+  constructor(
+    message: string,
+    readonly statusCode = 502,
+    readonly providerError?: { status: number; code?: string; message: string },
+  ) {
     super(message);
   }
 }
@@ -26,7 +32,7 @@ async function generateMentorReply(systemInstruction: string, prompt: string): P
     throw new GeminiError("The mentor is not connected yet. Please try again later.", 503);
   }
 
-  const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -51,7 +57,24 @@ async function generateMentorReply(systemInstruction: string, prompt: string): P
   });
 
   if (!response.ok) {
-    throw new GeminiError("The mentor couldn't respond just now. Please try again in a moment.");
+    const rawError = await response.text().catch(() => "");
+    let providerCode: string | undefined;
+    let providerMessage = `Gemini returned HTTP ${response.status}.`;
+    try {
+      const payload = JSON.parse(rawError) as { error?: { code?: number | string; status?: string; message?: string } };
+      providerCode = payload.error?.status ?? (payload.error?.code == null ? undefined : String(payload.error.code));
+      if (payload.error?.message) providerMessage = payload.error.message;
+    } catch {
+      if (rawError.trim()) providerMessage = rawError.trim();
+    }
+    providerMessage = providerMessage
+      .replace(/\bAIza[0-9A-Za-z_-]{20,}\b/g, "[redacted]")
+      .slice(0, 500);
+    throw new GeminiError(
+      "The mentor couldn't respond just now. Please try again in a moment.",
+      502,
+      { status: response.status, code: providerCode, message: providerMessage },
+    );
   }
   const data = (await response.json()) as {
     candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
@@ -178,45 +201,45 @@ router.post("/mentor", async (req, res): Promise<void> => {
     return;
   }
   const body = parsed.data;
-  const userId = getUserId(req);
   if (body.mode === "solution" && body.user_text !== "confirm-show-solution") {
     res.status(400).json({ error: "Confirm that you want to see the full solution first." });
     return;
   }
 
-  const [attempt] = body.attempt_id
-    ? await db
-        .select()
-        .from(attemptsTable)
-        .where(and(eq(attemptsTable.id, body.attempt_id), eq(attemptsTable.userId, userId)))
-        .limit(1)
-    : [];
-  if (body.attempt_id && !attempt) {
-    res.status(404).json({ error: "We couldn't find that saved attempt." });
-    return;
-  }
-
-  const problemId = body.problem_id ?? attempt?.problemId ?? undefined;
-  const [problem] = problemId
-    ? await db.select().from(problemsTable).where(eq(problemsTable.id, problemId)).limit(1)
-    : [];
-  if (problemId && !problem) {
-    res.status(404).json({ error: "We couldn't find that practice problem." });
-    return;
-  }
-
-  const language = body.language ?? attempt?.language ?? problem?.language ?? "JavaScript";
-  const currentHints = attempt?.hintsUsed ?? 0;
-  const systemInstruction = await personalizedSystemPrompt(userId, language, currentHints);
-  const prompt = [
-    `Requested mentor mode: ${body.mode}.`,
-    modeInstruction(body.mode),
-    problem ? `Practice problem: ${problem.title}\n${problem.description}` : "",
-    `Learner code:\n${body.code ?? attempt?.code ?? "(no code provided)"}`,
-    body.user_text && body.mode !== "solution" ? `Learner's message:\n${body.user_text}` : "",
-  ].filter(Boolean).join("\n\n");
-
   try {
+    const userId = getUserId(req);
+    const [attempt] = body.attempt_id
+      ? await db
+          .select()
+          .from(attemptsTable)
+          .where(and(eq(attemptsTable.id, body.attempt_id), eq(attemptsTable.userId, userId)))
+          .limit(1)
+      : [];
+    if (body.attempt_id && !attempt) {
+      res.status(404).json({ error: "We couldn't find that saved attempt." });
+      return;
+    }
+
+    const problemId = body.problem_id ?? attempt?.problemId ?? undefined;
+    const [problem] = problemId
+      ? await db.select().from(problemsTable).where(eq(problemsTable.id, problemId)).limit(1)
+      : [];
+    if (problemId && !problem) {
+      res.status(404).json({ error: "We couldn't find that practice problem." });
+      return;
+    }
+
+    const language = body.language ?? attempt?.language ?? problem?.language ?? "JavaScript";
+    const currentHints = attempt?.hintsUsed ?? 0;
+    const systemInstruction = await personalizedSystemPrompt(userId, language, currentHints);
+    const prompt = [
+      `Requested mentor mode: ${body.mode}.`,
+      modeInstruction(body.mode),
+      problem ? `Practice problem: ${problem.title}\n${problem.description}` : "",
+      `Learner code:\n${body.code ?? attempt?.code ?? "(no code provided)"}`,
+      body.user_text && body.mode !== "solution" ? `Learner's message:\n${body.user_text}` : "",
+    ].filter(Boolean).join("\n\n");
+
     const generated = await generateMentorReply(systemInstruction, prompt);
     const weakConcepts = await saveWeaknesses(userId, generated.weak_concepts);
     const hintsUsed = body.mode === "hint"
@@ -225,7 +248,11 @@ router.post("/mentor", async (req, res): Promise<void> => {
     res.json(AskMentorResponse.parse({ reply: generated.reply, weak_concepts: weakConcepts, hints_used: hintsUsed }));
   } catch (error) {
     if (error instanceof GeminiError) {
-      if (error.statusCode >= 500) req.log.error({ statusCode: error.statusCode }, "CodeMentor generation failed");
+      if (error.providerError) {
+        req.log.error({ model: GEMINI_MODEL, ...error.providerError }, "Gemini mentor request failed");
+      } else if (error.statusCode >= 500) {
+        req.log.error({ err: error, model: GEMINI_MODEL }, "CodeMentor generation failed");
+      }
       res.status(error.statusCode).json({ error: error.message });
       return;
     }
@@ -241,9 +268,9 @@ router.post("/doctor", async (req, res): Promise<void> => {
     return;
   }
 
-  const userId = getUserId(req);
-  const language = parsed.data.language ?? "JavaScript";
   try {
+    const userId = getUserId(req);
+    const language = parsed.data.language ?? "JavaScript";
     const systemInstruction = await personalizedSystemPrompt(userId, language, 0);
     const prompt = [
       `Code Doctor mode: ${parsed.data.mode}.`,
@@ -257,7 +284,11 @@ router.post("/doctor", async (req, res): Promise<void> => {
     res.json(AskDoctorResponse.parse({ reply: generated.reply, weak_concepts: weakConcepts, hints_used: 0 }));
   } catch (error) {
     if (error instanceof GeminiError) {
-      if (error.statusCode >= 500) req.log.error({ statusCode: error.statusCode }, "Code Doctor generation failed");
+      if (error.providerError) {
+        req.log.error({ model: GEMINI_MODEL, ...error.providerError }, "Gemini Code Doctor request failed");
+      } else if (error.statusCode >= 500) {
+        req.log.error({ err: error, model: GEMINI_MODEL }, "Code Doctor generation failed");
+      }
       res.status(error.statusCode).json({ error: error.message });
       return;
     }

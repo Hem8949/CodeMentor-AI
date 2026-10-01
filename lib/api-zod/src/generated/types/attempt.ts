@@ -5,6 +5,7 @@
  * API for CodeMentor AI
  * OpenAPI spec version: 0.1.0
  */
+import type { AttemptLanguage } from './attemptLanguage';
 import type { AttemptStatus } from './attemptStatus';
 
 export interface Attempt {
@@ -14,7 +15,7 @@ export interface Attempt {
   problem_id: string | null;
   /** @nullable */
   problem_title: string | null;
-  language: string;
+  language: AttemptLanguage;
   code: string;
   /** @nullable */
   output: string | null;

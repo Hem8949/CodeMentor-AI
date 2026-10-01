@@ -149,7 +149,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [JavaScript, Python, Java]
+            enum: [JavaScript, Python, Java, C++, C, TypeScript]
       responses:
         "200":
           description: Problems
@@ -333,7 +333,7 @@ components:
         email: { type: string, format: email }
         display_name: { type: string }
         skill_level: { type: string, enum: [Beginner, Intermediate, Advanced] }
-        preferred_language: { type: string, enum: [JavaScript, Python, Java] }
+        preferred_language: { type: string, enum: [JavaScript, Python, Java, C++, C, TypeScript] }
         created_at: { type: string, format: date-time }
       required: [id, email, display_name, skill_level, preferred_language, created_at]
     RegisterInput:
@@ -343,7 +343,7 @@ components:
         email: { type: string, format: email, maxLength: 254 }
         password: { type: string, minLength: 8, maxLength: 128 }
         skill_level: { type: string, enum: [Beginner, Intermediate, Advanced] }
-        preferred_language: { type: string, enum: [JavaScript, Python, Java] }
+        preferred_language: { type: string, enum: [JavaScript, Python, Java, C++, C, TypeScript] }
       required: [display_name, email, password, skill_level, preferred_language]
     LoginInput:
       type: object
@@ -363,14 +363,14 @@ components:
       properties:
         display_name: { type: string, minLength: 1, maxLength: 80 }
         skill_level: { type: string, enum: [Beginner, Intermediate, Advanced] }
-        preferred_language: { type: string, enum: [JavaScript, Python, Java] }
+        preferred_language: { type: string, enum: [JavaScript, Python, Java, C++, C, TypeScript] }
     Problem:
       type: object
       properties:
         id: { type: string }
         title: { type: string }
         description: { type: string }
-        language: { type: string, enum: [JavaScript, Python, Java] }
+        language: { type: string, enum: [JavaScript, Python, Java, C++, C, TypeScript] }
         difficulty: { type: string, enum: [easy, medium, hard] }
         starter_code: { type: string }
       required: [id, title, description, language, difficulty, starter_code]
@@ -381,7 +381,7 @@ components:
         user_id: { type: string }
         problem_id: { type: ["string", "null"] }
         problem_title: { type: ["string", "null"] }
-        language: { type: string }
+        language: { type: string, enum: [JavaScript, Python, Java, C++, C, TypeScript] }
         code: { type: string }
         output: { type: ["string", "null"] }
         status: { type: string, enum: [in_progress, solved, stuck] }
@@ -393,7 +393,7 @@ components:
       type: object
       properties:
         problem_id: { type: ["string", "null"] }
-        language: { type: string, enum: [JavaScript, Python, Java] }
+        language: { type: string, enum: [JavaScript, Python, Java, C++, C, TypeScript] }
         code: { type: string, maxLength: 50000 }
         output: { type: ["string", "null"], maxLength: 10000 }
         status: { type: string, enum: [in_progress, solved, stuck] }
@@ -413,7 +413,7 @@ components:
         problem_id: { type: string }
         attempt_id: { type: string }
         code: { type: string, maxLength: 50000 }
-        language: { type: string, enum: [JavaScript, Python, Java] }
+        language: { type: string, enum: [JavaScript, Python, Java, C++, C, TypeScript] }
         user_text: { type: string, maxLength: 4000 }
       required: [mode]
     DoctorInput:
@@ -421,7 +421,7 @@ components:
       properties:
         mode: { type: string, enum: [debug, improve] }
         code: { type: string, minLength: 1, maxLength: 50000 }
-        language: { type: string, enum: [JavaScript, Python, Java] }
+        language: { type: string, enum: [JavaScript, Python, Java, C++, C, TypeScript] }
         error: { type: string, maxLength: 4000 }
       required: [mode, code]
     MentorResponse:

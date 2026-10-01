@@ -12,6 +12,7 @@ export * from './attempt';
 export * from './attemptInput';
 export * from './attemptInputLanguage';
 export * from './attemptInputStatus';
+export * from './attemptLanguage';
 export * from './attemptStatus';
 export * from './attemptUpdate';
 export * from './attemptUpdateStatus';

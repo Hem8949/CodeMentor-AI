@@ -43,7 +43,7 @@ export const RegisterUserBody = zod.object({
   "email": zod.string().email().max(registerUserBodyEmailMax),
   "password": zod.string().min(registerUserBodyPasswordMin).max(registerUserBodyPasswordMax),
   "skill_level": zod.enum(['Beginner', 'Intermediate', 'Advanced']),
-  "preferred_language": zod.enum(['JavaScript', 'Python', 'Java'])
+  "preferred_language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript'])
 })
 
 export const RegisterUserResponse = zod.object({
@@ -53,7 +53,7 @@ export const RegisterUserResponse = zod.object({
   "email": zod.string().email(),
   "display_name": zod.string(),
   "skill_level": zod.enum(['Beginner', 'Intermediate', 'Advanced']),
-  "preferred_language": zod.enum(['JavaScript', 'Python', 'Java']),
+  "preferred_language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']),
   "created_at": zod.coerce.date()
 })
 })
@@ -80,7 +80,7 @@ export const LoginUserResponse = zod.object({
   "email": zod.string().email(),
   "display_name": zod.string(),
   "skill_level": zod.enum(['Beginner', 'Intermediate', 'Advanced']),
-  "preferred_language": zod.enum(['JavaScript', 'Python', 'Java']),
+  "preferred_language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']),
   "created_at": zod.coerce.date()
 })
 })
@@ -94,7 +94,7 @@ export const GetProfileResponse = zod.object({
   "email": zod.string().email(),
   "display_name": zod.string(),
   "skill_level": zod.enum(['Beginner', 'Intermediate', 'Advanced']),
-  "preferred_language": zod.enum(['JavaScript', 'Python', 'Java']),
+  "preferred_language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']),
   "created_at": zod.coerce.date()
 })
 
@@ -109,7 +109,7 @@ export const updateProfileBodyDisplayNameMax = 80;
 export const UpdateProfileBody = zod.object({
   "display_name": zod.string().min(1).max(updateProfileBodyDisplayNameMax).optional(),
   "skill_level": zod.enum(['Beginner', 'Intermediate', 'Advanced']).optional(),
-  "preferred_language": zod.enum(['JavaScript', 'Python', 'Java']).optional()
+  "preferred_language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']).optional()
 })
 
 export const UpdateProfileResponse = zod.object({
@@ -117,7 +117,7 @@ export const UpdateProfileResponse = zod.object({
   "email": zod.string().email(),
   "display_name": zod.string(),
   "skill_level": zod.enum(['Beginner', 'Intermediate', 'Advanced']),
-  "preferred_language": zod.enum(['JavaScript', 'Python', 'Java']),
+  "preferred_language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']),
   "created_at": zod.coerce.date()
 })
 
@@ -127,14 +127,14 @@ export const UpdateProfileResponse = zod.object({
  */
 export const GetProblemsQueryParams = zod.object({
   "difficulty": zod.enum(['easy', 'medium', 'hard']).optional(),
-  "language": zod.enum(['JavaScript', 'Python', 'Java']).optional()
+  "language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']).optional()
 })
 
 export const GetProblemsResponseItem = zod.object({
   "id": zod.string(),
   "title": zod.string(),
   "description": zod.string(),
-  "language": zod.enum(['JavaScript', 'Python', 'Java']),
+  "language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']),
   "difficulty": zod.enum(['easy', 'medium', 'hard']),
   "starter_code": zod.string()
 })
@@ -152,7 +152,7 @@ export const GetProblemResponse = zod.object({
   "id": zod.string(),
   "title": zod.string(),
   "description": zod.string(),
-  "language": zod.enum(['JavaScript', 'Python', 'Java']),
+  "language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']),
   "difficulty": zod.enum(['easy', 'medium', 'hard']),
   "starter_code": zod.string()
 })
@@ -170,7 +170,7 @@ export const GetAttemptsResponseItem = zod.object({
   "user_id": zod.string(),
   "problem_id": zod.string().nullable(),
   "problem_title": zod.string().nullable(),
-  "language": zod.string(),
+  "language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']),
   "code": zod.string(),
   "output": zod.string().nullable(),
   "status": zod.enum(['in_progress', 'solved', 'stuck']),
@@ -195,7 +195,7 @@ export const createAttemptBodyHintsUsedMax = 100;
 
 export const CreateAttemptBody = zod.object({
   "problem_id": zod.string().nullish(),
-  "language": zod.enum(['JavaScript', 'Python', 'Java']),
+  "language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']),
   "code": zod.string().max(createAttemptBodyCodeMax),
   "output": zod.string().max(createAttemptBodyOutputMax).nullish(),
   "status": zod.enum(['in_progress', 'solved', 'stuck']),
@@ -211,7 +211,7 @@ export const CreateAttemptResponse = zod.object({
   "user_id": zod.string(),
   "problem_id": zod.string().nullable(),
   "problem_title": zod.string().nullable(),
-  "language": zod.string(),
+  "language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']),
   "code": zod.string(),
   "output": zod.string().nullable(),
   "status": zod.enum(['in_progress', 'solved', 'stuck']),
@@ -253,7 +253,7 @@ export const UpdateAttemptResponse = zod.object({
   "user_id": zod.string(),
   "problem_id": zod.string().nullable(),
   "problem_title": zod.string().nullable(),
-  "language": zod.string(),
+  "language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']),
   "code": zod.string(),
   "output": zod.string().nullable(),
   "status": zod.enum(['in_progress', 'solved', 'stuck']),
@@ -277,7 +277,7 @@ export const AskMentorBody = zod.object({
   "problem_id": zod.string().optional(),
   "attempt_id": zod.string().optional(),
   "code": zod.string().max(askMentorBodyCodeMax).optional(),
-  "language": zod.enum(['JavaScript', 'Python', 'Java']).optional(),
+  "language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']).optional(),
   "user_text": zod.string().max(askMentorBodyUserTextMax).optional()
 })
 
@@ -304,7 +304,7 @@ export const askDoctorBodyErrorMax = 4000;
 export const AskDoctorBody = zod.object({
   "mode": zod.enum(['debug', 'improve']),
   "code": zod.string().min(1).max(askDoctorBodyCodeMax),
-  "language": zod.enum(['JavaScript', 'Python', 'Java']).optional(),
+  "language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']).optional(),
   "error": zod.string().max(askDoctorBodyErrorMax).optional()
 })
 
@@ -341,7 +341,7 @@ export const GetDashboardResponse = zod.object({
   "user_id": zod.string(),
   "problem_id": zod.string().nullable(),
   "problem_title": zod.string().nullable(),
-  "language": zod.string(),
+  "language": zod.enum(['JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript']),
   "code": zod.string(),
   "output": zod.string().nullable(),
   "status": zod.enum(['in_progress', 'solved', 'stuck']),

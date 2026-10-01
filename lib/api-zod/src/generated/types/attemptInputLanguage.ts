@@ -13,4 +13,7 @@ export const AttemptInputLanguage = {
   JavaScript: 'JavaScript',
   Python: 'Python',
   Java: 'Java',
+  'C++': 'C++',
+  C: 'C',
+  TypeScript: 'TypeScript',
 } as const;
