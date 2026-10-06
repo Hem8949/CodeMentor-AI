@@ -400,7 +400,7 @@ Review previous coding attempts and learning activity.
 ## 1. Clone the Repository
 
 ```bash
-git clone https://github.com/ashish-jagdale-ai/CodeMentor-AI.git
+git clone https://github.com/Hem8949/CodeMentor-AI.git
 
 cd CodeMentor-AI
 ```
@@ -571,7 +571,7 @@ CodeMentor AI addresses the theme by using a learner's **skill level, preferred 
 
 # 👨‍💻 Built By
 
-**ASHISH and Team**
+**ASHISH(A_J) and Team**
 
 > ASHISH JAGDALE, HEM PANCHOLI, OM SHIGNE.
 
